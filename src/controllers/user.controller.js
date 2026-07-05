@@ -1,6 +1,9 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import validator from "validator";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
+import generateJWT from "../utils/generate-JWT.js";
 
 const getAllUsers = async (req, res) => {
   let users = await User.find();
@@ -12,38 +15,43 @@ const register = async (req, res) => {
   const salt = 10;
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const newUser = new User({
+  const user = new User({
     firstName: firstName,
     lastName: lastName,
     email: email,
     password: hashedPassword,
   });
+  const token = generateJWT({ email: user.email, id: user._id }, "10m");
 
-  await newUser.save();
-  res.json(newUser);
+  await user.save();
+  res.json({ user, token: token });
 };
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-
   const emailValidation = validator.isEmail(email);
-  if (!emailValidation) {
-    res.status(404).json({ error: "Incorrect Email" });
-  } else {
-    if (emailValidation && password !== "") {
-      const user = await User.findOne({ email: email });
-      if (user) {
-        const matchedPassword = await bcrypt.compare(password, user.password);
-        if (matchedPassword) {
-          res.status(200).json({ msg: "Logged in successfully" });
-        } else {
-          res.status(404).json({ error: "Incorrect Password" });
-        }
-      } else {
-        res.status(404).json({ error: "User not found" });
-      }
-    }
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
   }
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(401).json({ error: "Invalid email or password" });
+  }
+
+  const isPasswordMatched = await bcrypt.compare(password, user.password);
+  if (!isPasswordMatched) {
+    return res.status(401).json({ error: "Invalid email or password" });
+  }
+
+  const token = generateJWT({ email: user.email, id: user._id }, "10m");
+  return res
+    .status(200)
+    .json({ message: "Logged in successfully", token: token });
 };
 
 export { getAllUsers, register, login };

@@ -1,11 +1,12 @@
 import express from "express";
-import * as coursesController from "../controllers/user.controller.js";
+import * as userController from "../controllers/user.controller.js";
+import verifyJWT from "../middlewares/verify-JWT.js";
 const router = express.Router();
 
-router.route("/").get(coursesController.getAllUsers);
+router.route("/").get(verifyJWT, userController.getAllUsers);
 
-router.route("/register").post(coursesController.register);
+router.route("/register").post(userController.register);
 
-router.route("/login").post(coursesController.login);
+router.route("/login").post(userController.login);
 
 export default router;
