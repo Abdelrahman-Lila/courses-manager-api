@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema(
       enum: [usersRole.ADMIN, usersRole.USER],
       default: usersRole.USER,
     },
+    avatar: {
+      type: String,
+      default: "uploads/profile.jpg",
+    },
   },
   { versionKey: false },
 );
