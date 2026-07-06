@@ -1,5 +1,6 @@
 import mongoose, { version } from "mongoose";
 import validator from "validator";
+import usersRole from "../utils/user-role.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,6 +21,11 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
+    },
+    role: {
+      type: String,
+      enum: [usersRole.ADMIN, usersRole.USER],
+      default: usersRole.USER,
     },
   },
   { versionKey: false },
