@@ -11,7 +11,7 @@ const getAllUsers = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, role } = req.body;
   const salt = 10;
   const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -20,8 +20,12 @@ const register = async (req, res) => {
     lastName: lastName,
     email: email,
     password: hashedPassword,
+    role: role,
   });
-  const token = generateJWT({ email: user.email, id: user._id }, "10m");
+  const token = generateJWT(
+    { email: user.email, id: user._id, role: user.role },
+    "10m",
+  );
 
   await user.save();
   res.json({ user, token: token });
@@ -48,7 +52,10 @@ const login = async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
-  const token = generateJWT({ email: user.email, id: user._id }, "10m");
+  const token = generateJWT(
+    { email: user.email, id: user._id, role: user.role },
+    "10m",
+  );
   return res
     .status(200)
     .json({ message: "Logged in successfully", token: token });
