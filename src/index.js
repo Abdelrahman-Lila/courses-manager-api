@@ -1,5 +1,7 @@
 import express from "express";
 import mongoose, { model } from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import Course from "./models/course.model.js";
 import coursesRouter from "./routes/course.route.js";
@@ -8,6 +10,9 @@ import usersRouter from "./routes/user.route.js";
 
 import "dotenv/config";
 import cors from "cors";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.port;
@@ -20,6 +25,7 @@ try {
   console.log(`error: ${err}`);
 }
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cors());
 app.use(express.json());
 

@@ -21,6 +21,7 @@ const register = async (req, res) => {
     email: email,
     password: hashedPassword,
     role: role,
+    avatar: req.file.filename,
   });
   const token = generateJWT(
     { email: user.email, id: user._id, role: user.role },
